@@ -1,4 +1,4 @@
-import kivy
+import japanize_kivy
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -15,16 +15,25 @@ class BookInfoApp(App):
     def build(self):
         layout = BoxLayout(orientation="vertical")
 
-        layout.add_widget(Label(text="Book Analysis App"))
+        layout.add_widget(Label(text="Book Analysis App", size_hint_y=None, height=80))
 
-        self.filter_input = TextInput(hint_text="Enter filter keyword")
+        self.filter_input = TextInput(
+            hint_text="Enter filter keyword", size_hint_y=None, height=80
+        )
         layout.add_widget(self.filter_input)
 
-        self.sort_input = TextInput(hint_text="Enter sort key")
+        self.sort_input = TextInput(
+            hint_text="Enter sort key", size_hint_y=None, height=80
+        )
         layout.add_widget(self.sort_input)
 
         layout.add_widget(
-            Button(text="Scrapa Book Info", on_press=self.on_scrape_button_press)
+            Button(
+                text="Scrape Book Info",
+                size_hint_y=None,
+                height=80,
+                on_press=self.on_scrape_button_press,
+            )
         )
 
         scroll_view = ScrollView()
@@ -36,27 +45,37 @@ class BookInfoApp(App):
         return layout
 
     def on_scrape_button_press(self, instance):
-        url = "http://example.com/books"
+        url = "http://books.toscrape.com"
         book_info = scrape_book_info(url)
         self.result_layout.clear_widgets()
 
         if not book_info:
-            self.result_layout.add_widget(Label(text="Error fetching data"))
+            self.result_layout.add_widget(
+                Label(text="Error fetching book information.")
+            )
             return
 
-        filter_keyword = self.filter_input.text()
+        filter_keyword = self.filter_input.text.lower()
         filtered_books = filter_books(book_info, filter_keyword)
 
         sort_key = self.sort_input.text
-        sort_books = sort_books(filtered_books, sort_key)
+        sorted_books = sort_books(filtered_books, sort_key)
 
-        for book in sort_books:
+        for book in sorted_books:
             self.result_layout.add_widget(
-                Label(text=f"Title: {book['title']}, Author: {book['author']}")
+                Label(
+                    text=f"Title: {book['title']}, Author: {book['author']}",
+                    size_hint_y=None,
+                    height=40,
+                    halign="left",
+                    text_size=(self.result_layout.width, None),
+                )
             )
 
-        analysis_result = analyze_book_data(sort_books)
-        self.result_layout.add_widget(Label(text=analysis_result))
+        analysis_result = analyze_book_data(sorted_books)
+        self.result_layout.add_widget(
+            Label(text=analysis_result, size_hint_y=None, height=40)
+        )
 
 
 if __name__ == "__main__":
