@@ -14,12 +14,9 @@ def scrape_book_info(url):
 
         for book in books:
             title = book.h3.a["title"]
-            author = (
-                book.find("p", class_="author").text
-                if book.find("p", class_="author")
-                else "Unknown"
-            )
-            book_info.append({"title": title, "author": author})
+            price = book.find("p", class_="price_color").text
+            rating = book.p["class"][1]
+            book_info.append({"title": title, "price": price, "rating": rating})
 
             time.sleep(2)
 

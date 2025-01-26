@@ -72,13 +72,13 @@ class BookInfoApp(App):
         if conn is not None:
             create_table(conn)
             for book in sorted_books:
-                insert_book(conn, (book["title"], book["author"]))
+                insert_book(conn, (book["title"], book["price"], book["rating"]))
             conn.close()
 
         for book in sorted_books:
             self.result_layout.add_widget(
                 Label(
-                    text=f"Title: {book['title']}, Author: {book['author']}",
+                    text=f"Title: {book['title']}, Price: {book['price']}, Rating: {book['rating']}",
                     size_hint_y=None,
                     height=40,
                     halign="left",

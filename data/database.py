@@ -16,7 +16,8 @@ def create_table(conn):
         sql_create_books_table = """ CREATE TABLE IF NOT EXISTS books (
                                         id integer PRIMARY KEY,
                                         title text NOT NULL,
-                                        author text NOT NULL
+                                        price text NOT NULL,
+                                        rating text NOT NULL
                                     ); """
         c = conn.cursor()
         c.execute(sql_create_books_table)
@@ -25,8 +26,8 @@ def create_table(conn):
 
 
 def insert_book(conn, book):
-    sql = """ INSERT INTO books(title,author)
-              VALUES(?,?) """
+    sql = """ INSERT INTO books(title, price, rating)
+              VALUES(?,?,?) """
     cur = conn.cursor()
     cur.execute(sql, book)
     conn.commit()
