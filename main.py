@@ -1,3 +1,4 @@
+import os
 import japanize_kivy
 from kivy.app import App
 from kivy.uix.label import Label
@@ -9,6 +10,7 @@ from kivy.uix.textinput import TextInput
 from dataprocessor.scraper import scrape_book_info
 from dataprocessor.data_analyzer import analyze_book_data
 from dataprocessor.data_processor import filter_books, sort_books
+from data.database import create_connection, create_table, insert_book
 
 
 class BookInfoApp(App):
@@ -60,6 +62,18 @@ class BookInfoApp(App):
 
         sort_key = self.sort_input.text
         sorted_books = sort_books(filtered_books, sort_key)
+
+        database_dir = "./data"
+        if not os.path.exists(database_dir):
+            os.makedirs(database_dir)
+        database = os.path.join(database_dir, "books.db")
+
+        conn = create_connection(database)
+        if conn is not None:
+            create_table(conn)
+            for book in sorted_books:
+                insert_book(conn, (book["title"], book["author"]))
+            conn.close()
 
         for book in sorted_books:
             self.result_layout.add_widget(
