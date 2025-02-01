@@ -11,10 +11,10 @@ ENV/
 *.log
 *.out
 *.tmp
+*.db
 
 # OS-specific files
 .DS_Store
-Thumbs.db
 
 # IDE-specific files
 .vscode/

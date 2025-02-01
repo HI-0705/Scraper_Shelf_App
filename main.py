@@ -1,5 +1,9 @@
 import os
 import japanize_kivy
+from kivy.config import Config
+
+Config.set("graphics", "width", "1000")
+Config.set("graphics", "height", "800")
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -10,7 +14,8 @@ from kivy.uix.textinput import TextInput
 from dataprocessor.scraper import scrape_book_info
 from dataprocessor.data_analyzer import analyze_book_data
 from dataprocessor.data_processor import filter_books, sort_books
-from data.database import create_connection, create_table, insert_book
+from dataprocessor.graph import plot_book_data
+from dataprocessor.database import create_connection, create_table, insert_book
 
 
 class BookInfoApp(App):
@@ -35,6 +40,15 @@ class BookInfoApp(App):
                 size_hint_y=None,
                 height=80,
                 on_press=self.on_scrape_button_press,
+            )
+        )
+
+        layout.add_widget(
+            Button(
+                text="show Graph",
+                size_hint_y=None,
+                height=80,
+                on_press=self.on_show_graph_button_press,
             )
         )
 
@@ -90,6 +104,12 @@ class BookInfoApp(App):
         self.result_layout.add_widget(
             Label(text=analysis_result, size_hint_y=None, height=40)
         )
+
+        self.book_info = sorted_books
+
+    def on_show_graph_button_press(self, instance):
+        if hasattr(self, "book_info"):
+            plot_book_data(self.book_info)
 
 
 if __name__ == "__main__":
