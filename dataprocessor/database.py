@@ -17,7 +17,8 @@ def create_table(conn):
                                         id integer PRIMARY KEY,
                                         title text NOT NULL,
                                         price text NOT NULL,
-                                        rating text NOT NULL
+                                        rating text NOT NULL,
+                                        category text NOT NULL
                                     ); """
         c = conn.cursor()
         c.execute(sql_create_books_table)
@@ -26,8 +27,8 @@ def create_table(conn):
 
 
 def insert_book(conn, book):
-    sql = """ INSERT INTO books(title, price, rating)
-              VALUES(?,?,?) """
+    sql = """ INSERT INTO books(title, price, rating, category)
+              VALUES(?,?,?,?) """
     cur = conn.cursor()
     cur.execute(sql, book)
     conn.commit()

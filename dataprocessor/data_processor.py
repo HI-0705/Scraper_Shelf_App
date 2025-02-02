@@ -6,4 +6,25 @@ def filter_books(book_info, keyword):
 
 
 def sort_books(books, key):
-    return sorted(books, key=lambda x: x.get(key, ""))
+    if key == "title":
+        return sorted(books, key=lambda x: x.get("title", "").lower())
+    elif key == "price":
+        return sorted(
+            books,
+            key=lambda x: float(
+                x.get("price", "").replace("£", "").replace("Â", "").strip()
+            ),
+        )
+    elif key == "rating":
+        rating = {
+            "One": 1,
+            "Two": 2,
+            "Three": 3,
+            "Four": 4,
+            "Five": 5,
+        }
+        return sorted(books, key=lambda x: rating.get(x.get("rating", "Zero"), 0))
+    elif key == "category":
+        return sorted(books, key=lambda x: x.get("category", "").lower())
+    else:
+        return books

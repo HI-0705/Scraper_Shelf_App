@@ -11,7 +11,11 @@ from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
-from dataprocessor.scraper import scrape_book_info
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.togglebutton import ToggleButton
+from kivy.uix.togglebutton import ToggleButtonBehavior
+from kivy.uix.spinner import Spinner
+from dataprocessor.scraper import scrape_book_info, scrape_categories
 from dataprocessor.data_analyzer import analyze_book_data
 from dataprocessor.data_processor import filter_books, sort_books
 from dataprocessor.graph import plot_book_data
@@ -29,10 +33,33 @@ class BookInfoApp(App):
         )
         layout.add_widget(self.filter_input)
 
-        self.sort_input = TextInput(
-            hint_text="Enter sort key", size_hint_y=None, height=80
+        sort_layout = BoxLayout(orientation="horizontal", size_hint_y=None, height=80)
+        self.sort_key = "title"
+
+        def on_sort_key_select(instance):
+            self.sort_key = instance.text.lower()
+
+        title_radio = ToggleButton(text="Title", group="sort", state="down")
+        title_radio.bind(on_release=on_sort_key_select)
+        sort_layout.add_widget(title_radio)
+
+        price_radio = ToggleButton(text="Price", group="sort")
+        price_radio.bind(on_release=on_sort_key_select)
+        sort_layout.add_widget(price_radio)
+
+        rating_radio = ToggleButton(text="Rating", group="sort")
+        rating_radio.bind(on_release=on_sort_key_select)
+        sort_layout.add_widget(rating_radio)
+
+        layout.add_widget(sort_layout)
+
+        self.category_spinner = Spinner(
+            text="Select Category",
+            values=("All",),
+            size_hint_y=None,
+            height=80,
         )
-        layout.add_widget(self.sort_input)
+        layout.add_widget(self.category_spinner)
 
         layout.add_widget(
             Button(
@@ -45,7 +72,7 @@ class BookInfoApp(App):
 
         layout.add_widget(
             Button(
-                text="show Graph",
+                text="Show Graph",
                 size_hint_y=None,
                 height=80,
                 on_press=self.on_show_graph_button_press,
@@ -58,11 +85,17 @@ class BookInfoApp(App):
         scroll_view.add_widget(self.result_layout)
         layout.add_widget(scroll_view)
 
+        self.load_categories()
+
         return layout
 
+    def load_categories(self):
+        categories = scrape_categories()
+        if categories:
+            self.category_spinner.values = ("All",) + tuple(categories)
+
     def on_scrape_button_press(self, instance):
-        url = "http://books.toscrape.com"
-        book_info = scrape_book_info(url)
+        book_info = scrape_book_info()
         self.result_layout.clear_widgets()
 
         if not book_info:
@@ -74,8 +107,11 @@ class BookInfoApp(App):
         filter_keyword = self.filter_input.text.lower()
         filtered_books = filter_books(book_info, filter_keyword)
 
-        sort_key = self.sort_input.text
-        sorted_books = sort_books(filtered_books, sort_key)
+        selected_category = self.category_spinner.text
+        if selected_category != "All":
+            filtered_books = [book for book in filtered_books if book["category"] == selected_category]
+
+        sorted_books = sort_books(filtered_books, self.sort_key)
 
         database_dir = "./data"
         if not os.path.exists(database_dir):
@@ -86,13 +122,13 @@ class BookInfoApp(App):
         if conn is not None:
             create_table(conn)
             for book in sorted_books:
-                insert_book(conn, (book["title"], book["price"], book["rating"]))
+                insert_book(conn, (book["title"], book["price"], book["rating"], book["category"]))
             conn.close()
 
         for book in sorted_books:
             self.result_layout.add_widget(
                 Label(
-                    text=f"Title: {book['title']}, Price: {book['price']}, Rating: {book['rating']}",
+                    text=f"Title: {book['title']}, Price: {book['price']}, Rating: {book['rating']}, Category: {book['category']}",
                     size_hint_y=None,
                     height=40,
                     halign="left",
